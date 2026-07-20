@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>SkyMon — Live Air Traffic</title>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIINfQW0OqIjk5B/1x0YQonuaNfQ1WzGgU=" crossorigin="">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
   <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body>
@@ -20,6 +20,6 @@
   </main>
   <footer><div><strong id="aircraft-count">0</strong> aviões <span>·</span> alcance: <strong id="range-label">{{ radius }} km</strong></div><div id="update-status">Conectando ao OpenSky…</div></footer>
   <script>window.SKYMON_CONFIG = {center: [{{ center_lat }}, {{ center_lon }}], radius: {{ radius }}};</script>
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJ8ZbLz7q7E4vW3wMZT5rIxdj0Xuo=" crossorigin=""></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
   <script src="/static/js/app.js"></script>
 </body></html>
