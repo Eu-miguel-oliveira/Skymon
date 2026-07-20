@@ -16,6 +16,16 @@ uvicorn app:app --host 0.0.0.0 --port 8000
 
 Abra `http://localhost:8000`. Sem credenciais, o OpenSky permite consultas anônimas, porém com resolução de 10 s e cota menor. Para o uso contínuo, crie um cliente OAuth2 na conta OpenSky e preencha `OPENSKY_CLIENT_ID` e `OPENSKY_CLIENT_SECRET` no `.env` — as credenciais não devem ir para o Git.
 
+## Instalação no Raspberry Pi
+
+Com o repositório já copiado ou clonado no Raspberry Pi OS, execute na raiz do projeto:
+
+```bash
+bash scripts/install.sh
+```
+
+O instalador usa `apt` para preparar Python e certificados, cria `.venv`, instala o conteúdo de `requirements.txt`, cria `data/` e `logs/`, e copia `.env.example` para `.env` quando necessário. Ele nunca substitui um `.env` existente.
+
 ## Inicialização no Raspberry Pi
 
 1. Copie o projeto para o Pi e instale as dependências na virtualenv.
