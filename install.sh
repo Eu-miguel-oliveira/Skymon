@@ -31,7 +31,16 @@ if apt-cache show chromium-browser >/dev/null 2>&1; then
 else
   BROWSER_PACKAGE="chromium"
 fi
-sudo apt-get install -y python3 python3-venv python3-pip ca-certificates curl "$BROWSER_PACKAGE"
+
+# Raspberry Pi OS Lite não possui ambiente gráfico. Nas imagens atuais os
+# pacotes rpd-* compõem o desktop Wayland; em versões anteriores usamos a
+# pilha X tradicional.
+if apt-cache show rpd-wayland-core >/dev/null 2>&1; then
+  DESKTOP_PACKAGES=(rpd-wayland-core rpd-theme rpd-preferences rpd-applications rpd-utilities rpd-graphics rpd-wayland-extras)
+else
+  DESKTOP_PACKAGES=(xserver-xorg lightdm raspberrypi-ui-mods)
+fi
+sudo apt-get install -y python3 python3-venv python3-pip ca-certificates curl "$BROWSER_PACKAGE" "${DESKTOP_PACKAGES[@]}"
 
 log "Criando e atualizando o ambiente Python"
 if [[ ! -x "$VENV_DIR/bin/python" ]]; then
@@ -152,6 +161,7 @@ if command -v raspi-config >/dev/null 2>&1; then
   # atalho de inicialização possa abrir o painel após cada boot.
   sudo raspi-config nonint do_boot_behaviour B4 || log "Não foi possível habilitar o login gráfico automático; o painel abrirá após o login gráfico."
 fi
+sudo systemctl set-default graphical.target
 sleep 2
 sudo systemctl --no-pager --full status "$SERVICE_NAME"
 

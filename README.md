@@ -26,6 +26,8 @@ bash install.sh
 
 O instalador solicita o `Client ID` e o `Client Secret` OAuth2 do OpenSky (o segredo não aparece no terminal). Ele instala os pacotes do sistema, cria `.venv`, prepara `.env`, cria e inicia o serviço `skymon.service`, configura login gráfico automático no Raspberry Pi OS e adiciona a abertura do Chromium em modo quiosque. Assim, após cada boot, o painel abre na tela touch e também fica disponível em `http://IP-DO-RASPBERRY:8000`.
 
+O script também instala o ambiente gráfico quando a imagem usada é Raspberry Pi OS Lite.
+
 Pressione Enter no `Client ID` somente se quiser usar acesso anônimo: nesse modo o painel atualiza a cada cinco minutos para respeitar a cota do OpenSky.
 
 O aplicativo salva uma amostra por minuto em `data/skymon.db`, preparando a Fase 2 (histórico e estatísticas) sem sobrecarregar o cartão SD. A coleta REST usa uma caixa geográfica de 200 km e o navegador recebe somente atualizações WebSocket; o mapa permanece aberto.
