@@ -133,6 +133,10 @@ sudo tee /usr/local/bin/skymon-kiosk >/dev/null <<'EOF'
 #!/usr/bin/env bash
 set -eu
 
+if command -v xset >/dev/null 2>&1; then
+  xset s off -dpms s noblank || true
+fi
+
 for _ in $(seq 1 30); do
   curl --silent --fail http://127.0.0.1:8000/ >/dev/null 2>&1 && break
   sleep 1
@@ -144,7 +148,7 @@ else
   BROWSER="chromium"
 fi
 
-exec "$BROWSER" --kiosk --noerrdialogs --disable-infobars --disable-session-crashed-bubble http://127.0.0.1:8000
+exec "$BROWSER" --kiosk --noerrdialogs --disable-infobars --disable-session-crashed-bubble --password-store=basic --disable-gpu --disable-gpu-compositing http://127.0.0.1:8000
 EOF
 sudo chmod 755 /usr/local/bin/skymon-kiosk
 
@@ -172,8 +176,16 @@ sudo systemctl set-default graphical.target
 # Forçar o driver fbdev evita que o Xorg encerre antes de iniciar o desktop.
 if [[ -e /dev/fb0 && ! -d /dev/dri ]]; then
   log "Configurando a tela framebuffer legada"
+  FB_DEVICE="/dev/fb0"
+  FB_DEPTH="24"
+  # Displays SPI FBTFT antigos (ILI9486, ILI9341 etc.) normalmente são o
+  # segundo framebuffer. O fb0 continua sendo a saída HDMI do firmware.
+  if [[ -e /dev/fb1 ]] && grep -qE '^(fb_ili|fbtft)' /proc/modules; then
+    FB_DEVICE="/dev/fb1"
+    FB_DEPTH="16"
+  fi
   sudo install -d -m 755 /etc/X11/xorg.conf.d
-  sudo tee /etc/X11/xorg.conf.d/99-skymon-fbdev.conf >/dev/null <<'EOF'
+  sudo tee /etc/X11/xorg.conf.d/99-skymon-fbdev.conf >/dev/null <<EOF
 Section "Monitor"
     Identifier "Monitor0"
 EndSection
@@ -181,16 +193,16 @@ EndSection
 Section "Device"
     Identifier "Card0"
     Driver "fbdev"
-    Option "fbdev" "/dev/fb0"
+    Option "fbdev" "${FB_DEVICE}"
 EndSection
 
 Section "Screen"
     Identifier "Screen0"
     Device "Card0"
     Monitor "Monitor0"
-    DefaultDepth 24
+    DefaultDepth ${FB_DEPTH}
     SubSection "Display"
-        Depth 24
+        Depth ${FB_DEPTH}
         Modes "480x320"
     EndSubSection
 EndSection
