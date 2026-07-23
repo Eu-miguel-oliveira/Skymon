@@ -167,6 +167,20 @@ if command -v raspi-config >/dev/null 2>&1; then
   sudo raspi-config nonint do_boot_behaviour B4 || log "Não foi possível habilitar o login gráfico automático; o painel abrirá após o login gráfico."
 fi
 sudo systemctl set-default graphical.target
+
+# Algumas telas touch SPI usam o framebuffer legado (/dev/fb0), sem DRM.
+# Forçar o driver fbdev evita que o Xorg encerre antes de iniciar o desktop.
+if [[ -e /dev/fb0 && ! -d /dev/dri ]]; then
+  log "Configurando a tela framebuffer legada"
+  sudo install -d -m 755 /etc/X11/xorg.conf.d
+  sudo tee /etc/X11/xorg.conf.d/99-skymon-fbdev.conf >/dev/null <<'EOF'
+Section "Device"
+    Identifier "Raspberry Pi framebuffer"
+    Driver "fbdev"
+    Option "fbdev" "/dev/fb0"
+EndSection
+EOF
+fi
 sleep 2
 sudo systemctl --no-pager --full status "$SERVICE_NAME"
 
