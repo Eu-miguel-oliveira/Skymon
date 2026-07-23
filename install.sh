@@ -174,10 +174,25 @@ if [[ -e /dev/fb0 && ! -d /dev/dri ]]; then
   log "Configurando a tela framebuffer legada"
   sudo install -d -m 755 /etc/X11/xorg.conf.d
   sudo tee /etc/X11/xorg.conf.d/99-skymon-fbdev.conf >/dev/null <<'EOF'
+Section "Monitor"
+    Identifier "Monitor0"
+EndSection
+
 Section "Device"
-    Identifier "Raspberry Pi framebuffer"
+    Identifier "Card0"
     Driver "fbdev"
     Option "fbdev" "/dev/fb0"
+EndSection
+
+Section "Screen"
+    Identifier "Screen0"
+    Device "Card0"
+    Monitor "Monitor0"
+    DefaultDepth 24
+    SubSection "Display"
+        Depth 24
+        Modes "480x320"
+    EndSubSection
 EndSection
 EOF
 fi
