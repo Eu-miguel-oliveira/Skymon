@@ -128,6 +128,25 @@ sudo systemctl daemon-reload
 sudo systemctl enable "$SERVICE_NAME"
 sudo systemctl restart "$SERVICE_NAME"
 
+# Alguns displays SPI FBTFT antigos só inicializam corretamente depois que o
+# servidor gráfico é reaberto uma vez, após o painel terminar seu reset físico.
+sudo tee /etc/systemd/system/skymon-display-warmup.service >/dev/null <<'EOF'
+[Unit]
+Description=SkyMon legacy SPI display warmup
+Wants=lightdm.service
+After=lightdm.service
+
+[Service]
+Type=oneshot
+ExecStart=/bin/sleep 8
+ExecStart=/bin/systemctl restart lightdm.service
+
+[Install]
+WantedBy=graphical.target
+EOF
+sudo systemctl daemon-reload
+sudo systemctl enable skymon-display-warmup.service
+
 log "Configurando abertura automática na tela do Raspberry"
 sudo tee /usr/local/bin/skymon-kiosk >/dev/null <<'EOF'
 #!/usr/bin/env bash
