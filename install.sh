@@ -15,6 +15,7 @@ fail() { printf '\n\033[1;31m[SkyMon] Erro:\033[0m %s\n' "$1" >&2; exit 1; }
 [[ -f "$PROJECT_DIR/app.py" && -f "$PROJECT_DIR/requirements.txt" ]] || fail "Execute este script na pasta raiz do repositório SkyMon."
 command -v apt-get >/dev/null 2>&1 || fail "Este instalador requer Raspberry Pi OS ou Debian (apt-get não encontrado)."
 command -v sudo >/dev/null 2>&1 || fail "O comando sudo é necessário."
+[[ "$EUID" -ne 0 ]] || fail "Execute 'bash install.sh' como seu usuário normal, sem sudo."
 
 # O serviço precisa usar o usuário que clonou o repositório, não o root.
 APP_USER="${SUDO_USER:-$(id -un)}"
@@ -23,6 +24,9 @@ getent passwd "$APP_USER" >/dev/null || fail "Não foi possível localizar o usu
 APP_GROUP="$(id -gn "$APP_USER")"
 APP_HOME="$(getent passwd "$APP_USER" | cut -d: -f6)"
 [[ -n "$APP_HOME" && -d "$APP_HOME" ]] || fail "Não foi possível localizar a pasta pessoal de '$APP_USER'."
+
+# Corrige permissões deixadas por uma instalação anterior executada com sudo.
+sudo chown -R "$APP_USER:$APP_GROUP" "$PROJECT_DIR"
 
 log "Instalando dependências do sistema"
 sudo apt-get update
@@ -55,6 +59,7 @@ if [[ ! -f "$ENV_FILE" ]]; then
   cp "$PROJECT_DIR/.env.example" "$ENV_FILE"
 fi
 chmod 600 "$ENV_FILE"
+chown "$APP_USER:$APP_GROUP" "$ENV_FILE"
 
 log "Configurando o acesso ao OpenSky"
 echo "Crie um API Client na sua conta OpenSky. O segredo digitado não será exibido."
